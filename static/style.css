@@ -1,0 +1,13 @@
+* {
+    font-family: Verdana;
+    text-decoration: none;
+}
+#status{
+    text-align: center;
+    font-size: 50pt;
+}
+#footer {
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+}

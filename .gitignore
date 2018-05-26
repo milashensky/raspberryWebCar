@@ -1,0 +1,16 @@
+*~
+*#
+*.pyc
+*.mo
+/src
+/tmp
+/build
+local_settings.py
+*.sqlite
+.idea/
+/venv/
+/data/
+Thumbs.db
+__pycache__
+erl_crash.dump
+.DS_Store
