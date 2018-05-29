@@ -37,15 +37,15 @@ def parse_request():
             amspi.run_dc_motors([amspi.DC_Motor_3, amspi.DC_Motor_4])
         if 'down' in direction:
             amspi.stop_dc_motors([amspi.DC_Motor_3, amspi.DC_Motor_4])
-            amspi.run_dc_motors([amspi.DC_Motor_3, amspi.DC_Motor_4], clockwise=True)
+            amspi.run_dc_motors([amspi.DC_Motor_3, amspi.DC_Motor_4], clockwise=False)
         if 'left' in direction:
             amspi.stop_dc_motors([amspi.DC_Motor_3, amspi.DC_Motor_4])
-            amspi.run_dc_motors([amspi.DC_Motor_4], clockwise=True)
-            amspi.run_dc_motors([amspi.DC_Motor_3], clockwise=False)
+            amspi.run_dc_motors([amspi.DC_Motor_3], clockwise=True)
+            amspi.run_dc_motors([amspi.DC_Motor_4], clockwise=False)
         if 'right' in direction:
             amspi.stop_dc_motors([amspi.DC_Motor_3, amspi.DC_Motor_4])
-            amspi.run_dc_motors([amspi.DC_Motor_4], clockwise=False)
-            amspi.run_dc_motors([amspi.DC_Motor_3], clockwise=True)
+            amspi.run_dc_motors([amspi.DC_Motor_3], clockwise=False)
+            amspi.run_dc_motors([amspi.DC_Motor_4], clockwise=True)
         if direction.strip() == '':
             amspi.stop_dc_motors([amspi.DC_Motor_3, amspi.DC_Motor_4])
     return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
