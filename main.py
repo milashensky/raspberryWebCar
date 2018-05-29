@@ -1,9 +1,19 @@
 import json
+import sys
+import os
 
-from flask import Flask, url_for, send_from_directory, request
+from flask import Flask, send_from_directory, request
 from flask import render_template
+from modules.AMSpi import AMSpi
 
+sys.path.insert(0, os.path.join(os.path.dirname(__file__)))
 app = Flask(__name__)
+amspi = AMSpi()
+# Set PINs for controlling shift register (GPIO numbering)
+amspi.set_74HC595_pins(21, 20, 16)
+# Set PINs for controlling all 4 motors (GPIO numbering)
+amspi.set_L293D_pins(5, 6, 13, 19)
+
 
 @app.route('/static/<path:path>')
 def send_static(path):
@@ -21,20 +31,21 @@ def parse_request():
     if response:
         data = json.loads(response.decode())
         print(data)
-        l = 0
-        r = 0
         direction = data.get('direction', '')
         if 'up' in direction:
-            l += 1
-            r += 1
+            amspi.stop_dc_motors([amspi.DC_Motor_3, amspi.DC_Motor_4])
+            amspi.run_dc_motors([amspi.DC_Motor_3, amspi.DC_Motor_4])
         if 'down' in direction:
-            l -= 1
-            r -= 1
+            amspi.stop_dc_motors([amspi.DC_Motor_3, amspi.DC_Motor_4])
+            amspi.run_dc_motors([amspi.DC_Motor_3, amspi.DC_Motor_4], clockwise=True)
         if 'left' in direction:
-            r += 1
+            amspi.stop_dc_motors([amspi.DC_Motor_3, amspi.DC_Motor_4])
+            amspi.run_dc_motors([amspi.DC_Motor_4], clockwise=True)
+            amspi.run_dc_motors([amspi.DC_Motor_3], clockwise=False)
         if 'right' in direction:
-            l += 1
+            amspi.stop_dc_motors([amspi.DC_Motor_3, amspi.DC_Motor_4])
+            amspi.run_dc_motors([amspi.DC_Motor_4], clockwise=False)
+            amspi.run_dc_motors([amspi.DC_Motor_3], clockwise=True)
         if direction.strip() == '':
-            l = 0
-            r = 0
-    return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+            amspi.stop_dc_motors([amspi.DC_Motor_3, amspi.DC_Motor_4])
+    return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
