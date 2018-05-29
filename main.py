@@ -33,20 +33,22 @@ def parse_request():
         print(data)
         direction = data.get('direction', '')
         if 'up' in direction:
-            amspi.stop_dc_motors([amspi.DC_Motor_3, amspi.DC_Motor_4])
-            amspi.run_dc_motors([amspi.DC_Motor_3, amspi.DC_Motor_4])
+            amspi.stop_dc_motors([1,2,3,4])
+            amspi.run_dc_motors([amspi.DC_Motor_1, amspi.DC_Motor_3])
+            amspi.run_dc_motors([amspi.DC_Motor_2, amspi.DC_Motor_4], clockwise=False)
         if 'down' in direction:
-            amspi.stop_dc_motors([amspi.DC_Motor_3, amspi.DC_Motor_4])
-            amspi.run_dc_motors([amspi.DC_Motor_3, amspi.DC_Motor_4], clockwise=False)
+            amspi.stop_dc_motors([1,2,3,4])
+            amspi.run_dc_motors([amspi.DC_Motor_1, amspi.DC_Motor_3], clockwise=False)
+            amspi.run_dc_motors([amspi.DC_Motor_2, amspi.DC_Motor_4])
         if 'left' in direction:
             print('turn left')
-            amspi.stop_dc_motors([amspi.DC_Motor_3, amspi.DC_Motor_4])
-            amspi.run_dc_motors([amspi.DC_Motor_4], clockwise=True)
-            amspi.run_dc_motors([amspi.DC_Motor_3], clockwise=False)
+            amspi.stop_dc_motors([1,2,3,4])
+            amspi.run_dc_motors([2, 3])
+            amspi.run_dc_motors([1, 4], clockwise=False)
         if 'right' in direction:
-            amspi.stop_dc_motors([amspi.DC_Motor_3, amspi.DC_Motor_4])
-            amspi.run_dc_motors([amspi.DC_Motor_4], clockwise=False)
-            amspi.run_dc_motors([amspi.DC_Motor_3], clockwise=True)
+            amspi.stop_dc_motors([1,2,3,4])
+            amspi.run_dc_motors([2, 3], clockwise=False)
+            amspi.run_dc_motors([1, 4])
         if direction.strip() == '':
-            amspi.stop_dc_motors([amspi.DC_Motor_3, amspi.DC_Motor_4])
+            amspi.stop_dc_motors([1,2,3,4])
     return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
