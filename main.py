@@ -1,6 +1,7 @@
 import json
 import sys
 import os
+import time
 
 from flask import Flask, send_from_directory, request
 from flask import render_template
@@ -34,21 +35,20 @@ def parse_request():
         direction = data.get('direction', '')
         if 'up' in direction:
             amspi.stop_dc_motors([1,2,3,4])
-            amspi.run_dc_motors([amspi.DC_Motor_1, amspi.DC_Motor_3])
-            amspi.run_dc_motors([amspi.DC_Motor_2, amspi.DC_Motor_4], clockwise=False)
+            amspi.run_dc_motors([amspi.DC_Motor_1, amspi.DC_Motor_3, amspi.DC_Motor_2, amspi.DC_Motor_4])
         if 'down' in direction:
             amspi.stop_dc_motors([1,2,3,4])
-            amspi.run_dc_motors([amspi.DC_Motor_1, amspi.DC_Motor_3], clockwise=False)
-            amspi.run_dc_motors([amspi.DC_Motor_2, amspi.DC_Motor_4])
+            amspi.run_dc_motors([amspi.DC_Motor_1, amspi.DC_Motor_2, amspi.DC_Motor_4, amspi.DC_Motor_3], clockwise=False)
         if 'left' in direction:
-            print('turn left')
+            # print('turn left')
             amspi.stop_dc_motors([1,2,3,4])
             amspi.run_dc_motors([2, 3])
             amspi.run_dc_motors([1, 4], clockwise=False)
         if 'right' in direction:
-            amspi.stop_dc_motors([1,2,3,4])
+            amspi.stop_dc_motors([1, 2, 3, 4])
             amspi.run_dc_motors([2, 3], clockwise=False)
             amspi.run_dc_motors([1, 4])
         if direction.strip() == '':
             amspi.stop_dc_motors([1,2,3,4])
     return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
+
