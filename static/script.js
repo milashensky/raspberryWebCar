@@ -1,6 +1,6 @@
 window.addEventListener("load", function() {
     var sendPosition = function (data) {
-        // console.log(data);
+        console.log(data);
         var xhr = new XMLHttpRequest();
         xhr.open("POST", '/control/', true);
         xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
@@ -24,7 +24,7 @@ window.addEventListener("load", function() {
     dynamic.on('start end', function(evt, data) {
         if (evt.type == 'end') {
             sendPosition({left: 0, right: 0, speed: 0});
-            // console.log('se', evt.type);
+            console.log('se', evt.type);
         }
     }).on('move', function(evt, data) {
         if (data && data.direction){
@@ -34,6 +34,7 @@ window.addEventListener("load", function() {
             if(Math.abs(last_speed - speed) > speedT || Math.abs(last_ang - ang) > angT){
                 last_speed = speed;
                 last_ang = ang;
+                direction = (Math.abs(data.angle.degree) < 180)
                 // console.log('speed: ' + speed + '; ang: '+ ang);
                 clearTimeout(timerId);
                 timerId = setTimeout(function() {
@@ -41,6 +42,7 @@ window.addEventListener("load", function() {
                         left: Math.round(Math.sin(ang*3.14/180) * 100)/100,
                         right: Math.round(Math.cos(ang*3.14/180) * 100)/100,
                         speed: speed,
+                        direction: direction,
                     })
                 }, 100);
             }

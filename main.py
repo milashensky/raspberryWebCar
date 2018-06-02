@@ -6,12 +6,10 @@ import math
 
 from flask import Flask, send_from_directory, request
 from flask import render_template
-from modules.AMSpi import AMSpi
+from modules.L293D import MotorContol
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__)))
-amspi = AMSpi()
-amspi.set_74HC595_pins(21, 20, 16)
-amspi.set_L293D_pins(5, 6, 13, 19)
+a = MotorContol()
 app = Flask(__name__)
 
 
@@ -31,17 +29,22 @@ def parse_request():
     if response:
         data = json.loads(response.decode())
         # print(data)
-        left = data.get('left', 0)
-        right = data.get('right', 0)
+        left = math.fabs(data.get('left', 0))
+        right = math.fabs(data.get('right', 0))
         speed = data.get('speed', 0)
-        leftCl = False
-        rightCl = False
-        if left < 0:
-            leftCl = True
-        if right < 0:
-            rightCl = True
-        amspi.stop_dc_motors([1,2,3,4])
-        amspi.run_dc_motors([2, 3], clockwise=rightCl, speed=round(right * speed * 100 / 3))
-        amspi.run_dc_motors([1, 4], clockwise=leftCl, speed=round(left * speed * 100 / 3))
+        direction = data.get('direction', True)
+        if not speed:
+            a.stopMotor(1)
+            a.stopMotor(2)
+            a.stopMotor(3)
+            a.stopMotor(4)
+        else:
+            a.runMotor(2, round(right * speed * 100 / 3), direction)
+            a.runMotor(3, round(right * speed * 100 / 3), direction)
+            a.runMotor(1, round(left * speed * 100 / 3), direction)
+            a.runMotor(4, round(left * speed * 100 / 3), direction)
+
+        # amspi.run_dc_motors([2, 3], clockwise=rightCl, speed=)
+        # amspi.run_dc_motors([1, 4], clockwise=leftCl, speed=round(left * speed * 100 / 3))
         time.sleep(0.5)
     return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
