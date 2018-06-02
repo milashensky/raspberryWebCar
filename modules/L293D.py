@@ -5,7 +5,7 @@ import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__)))
 #include <stdio.h>
-from PiZyPWM import PiZyPwm
+# from PiZyPWM import PiZyPwm
 
 
 
@@ -42,7 +42,7 @@ import time
    MOTOR_ latch pins.  This saves four gpios.
 """
 
-# typedef unsigned char uint8_t;
+# typedef unsigned char uint8_t
 
 def BIT(bit):
     return 1 << (bit)
@@ -83,7 +83,7 @@ BRAKE    = 3
 RELEASE  = 4
 
 class ATMotor:
-    pwm = None
+    # pwm = None
     speed = 0
     pin = 0
     freq = 100 # DUNNO
@@ -92,87 +92,72 @@ class ATMotor:
         self.pin = pin
         GPIO.setup(pin, GPIO.OUT)
         GPIO.output(pin, 0)
-        self.pwm = PiZyPwm(self.freq, pin, scheme)
-        self.pwm.start(self.freq)
+        # self.pwm = PiZyPwm(self.freq, pin, scheme)
+        # self.pwm.start(self.freq)
 
     def destroy(self):
         if self.pin:
             GPIO.output(self.pin, 0)
-        if self.pwm:
-            self.pwm.stop()
+        # if self.pwm:
+        #     self.pwm.stop()
 
 
-class MotorContol:
-    latch_state = 0
-    scheme = GPIO.BCM
-    Motors = {
-        1: None,
-        2: None,
-        3: None,
-        4: None,
-    }
+class MotorControl:
+    latch_state = None
 
     def latch_tx(self):
-        GPIO.output(MOTORLATCH, GPIO.LOW)
-        GPIO.output(MOTORDATA, GPIO.LOW)
+       GPIO.output(MOTORLATCH, GPIO.LOW)
+       GPIO.output(MOTORDATA, GPIO.LOW)
 
-        for i in range(0, 8):
-            # time.sleep(0.01) # 10 micros delay
+       for i in range(0, 8):
+          # time.sleep(0.01) # 10 micros delay
 
-            GPIO.output(MOTORCLK, GPIO.LOW)
+          GPIO.output(MOTORCLK, GPIO.LOW)
 
-            if self.latch_state & BIT(7 - i):
-                GPIO.output(MOTORDATA, GPIO.HIGH)
-            else:
-                GPIO.output(MOTORDATA, GPIO.LOW)
-            # time.sleep(0.01)  # 10 micros delay
-            GPIO.output(MOTORCLK, GPIO.HIGH)
-        GPIO.output(MOTORLATCH, GPIO.HIGH)
-        return True
-
-
-    def __init__(self, pins=[MOTOR_1_PWM, MOTOR_2_PWM, MOTOR_3_PWM, MOTOR_4_PWM], scheme=GPIO.BCM):
-        self.scheme = scheme
-        GPIO.setmode(scheme)
+          if self.latch_state & BIT(7-i):
+              GPIO.output(MOTORDATA, GPIO.HIGH)
+          else:
+              GPIO.output(MOTORDATA, GPIO.LOW)
+          time.sleep(0.01)  # 10 micros delay
+          GPIO.output(MOTORCLK, GPIO.HIGH)
+       GPIO.output(MOTORLATCH, GPIO.HIGH)
+       return True
 
 
+    def __init__(self):
+        GPIO.setmode(GPIO.BCM)
         GPIO.setup(MOTORLATCH,  GPIO.OUT)
         GPIO.setup(MOTORENABLE, GPIO.OUT)
         GPIO.setup(MOTORDATA,   GPIO.OUT)
         GPIO.setup(MOTORCLK,    GPIO.OUT)
 
-        for i in range(0, 4):
-            if pins[i]:
-                self.Motors[i+1] = ATMotor(pin=pins[i], scheme=scheme)
+        GPIO.setup(MOTOR_1_PWM, GPIO.OUT)
+        GPIO.setup(MOTOR_2_PWM, GPIO.OUT)
+        GPIO.setup(MOTOR_3_PWM, GPIO.OUT)
+        GPIO.setup(MOTOR_4_PWM, GPIO.OUT)
 
-        self.Motors[3] = ATMotor(MOTOR_3_PWM, scheme)
-        self.Motors[4] = ATMotor(MOTOR_4_PWM, scheme)
-
+        GPIO.output(MOTOR_1_PWM, 0) # PWM in ideal
+        GPIO.output(MOTOR_2_PWM, 0) # PWM in ideal
+        GPIO.output(MOTOR_3_PWM, 0) # PWM in ideal
+        GPIO.output(MOTOR_4_PWM, 0) # PWM in ideal
         self.latch_state = 0
         self.latch_tx()
         GPIO.output(MOTORENABLE, GPIO.LOW)
-
-        for k, v in self.Motors.items():
-            if v:
-                self.DCMotorInit(k)
         return None
 
     def DCMotorInit(self, num):
         if num == 1:
-            self.latch_state &= ~BIT(MOTOR1_A) & ~BIT(MOTOR1_B)
+          self.latch_state &= ~BIT(MOTOR1_A) & ~BIT(MOTOR1_B)
         elif num == 2:
-            self.latch_state &= ~BIT(MOTOR2_A) & ~BIT(MOTOR2_B)
+          self.latch_state &= ~BIT(MOTOR2_A) & ~BIT(MOTOR2_B)
         elif num == 3:
-            self.latch_state &= ~BIT(MOTOR3_A) & ~BIT(MOTOR3_B)
+          self.latch_state &= ~BIT(MOTOR3_A) & ~BIT(MOTOR3_B)
         elif num == 4:
-            self.latch_state &= ~BIT(MOTOR4_A) & ~BIT(MOTOR4_B)
+          self.latch_state &= ~BIT(MOTOR4_A) & ~BIT(MOTOR4_B)
         else:
-            return None
+          return
         self.latch_tx()
-        # print("Latch=%s"% self.latch_state)
-        motor = self.getMotor(num)
-        motor.pwm = PiZyPwm(motor.freq, motor.pin, self.scheme)
-        motor.pwm.start(0) # DUNNO
+        print("Latch=%s"% self.latch_state)
         return True
 
     def DCMotorRun(self, motornum, cmd):
@@ -205,140 +190,116 @@ class MotorContol:
             return
 
         self.latch_tx()
-        # print("Latch=%s" % self.latch_state)
+        print("Latch=%s" % self.latch_state)
         return True
 
-    def runMotor(self, num, speed=140, forward=True):
-        motor = self.getMotor(num)
-        if motor:
-            if speed < 45:
-                speed = 45
-            if speed > 160:
-                speed = 160
-            if speed and motor.speed != speed:
-                motor.speed = speed
-                motor.pwm.changeDutyCycle(motor.speed)
-            if forward:
+    def runMotor(self, num, speed=100, direction=True):
+        pin = None
+        if num == 1:
+            pin = MOTOR_1_PWM
+        elif num == 2:
+            pin = MOTOR_2_PWM
+        elif num == 3:
+            pin = MOTOR_3_PWM
+        elif num == 4:
+            pin = MOTOR_4_PWM
+        else:
+            return None
+        if pin:
+            GPIO.output(pin, speed)
+            if direction:
                 self.DCMotorRun(num, FORWARD)
             else:
                 self.DCMotorRun(num, BACKWARD)
-        return True
 
     def stopMotor(self, num):
-        motor = self.getMotor(num)
-        if motor:
-            # if motor.speed:
-            #
-            motor.speed = 0
-            self.DCMotorRun(num, RELEASE)
-        return True
+        self.DCMotorRun(num, RELEASE)
 
-    def releaseMotor(self, num):
-        motor = self.getMotor(num)
-        if motor:
-            if motor.speed:
-                self.stopMotor(num)
-            time.sleep(2)
-            motor.destroy()
-        return True
-
-
-    def getMotor(self, num):
-        if self.Motors[num]:
-            return self.Motors[num]
-        else:
-            return None
-
-
-
-    def main(self):
-        # MIN 45 STABLE
-        i = 45
-        # self.DCMotorInit(1)
-        # self.DCMotorInit(2)
-        # self.DCMotorInit(3)
-        # self.DCMotorInit(4)
-        m3 = self.Motors[3].pwm
-        m4 = self.Motors[4].pwm
-        #
-        # m3.start(0)
-        # m4.start(0)
-
-        while i < 50:
-            print('I: %s' % i)
-            # GPIO.output(MOTOR_3_PWM, GPIO.HIGH)
-            # GPIO.output(MOTOR_4_PWM, GPIO.HIGH)
-
-            m4.changeDutyCycle(i)
-            m3.changeDutyCycle(i+60)
-
-            self.DCMotorRun(3, FORWARD)
-            self.DCMotorRun(4, FORWARD)
-            time.sleep(2)
-
-            self.DCMotorRun(3, RELEASE)
-            self.DCMotorRun(4, RELEASE)
-
-            time.sleep(2)
-
-            m4.changeDutyCycle(i)
-            # m3.changeDutyCycle(i)
-
-            # GPIO.output(MOTOR_4_PWM, i)
-            # GPIO.output(MOTOR_3_PWM, 220-i)
-
-            self.DCMotorRun(3, BACKWARD)
-            self.DCMotorRun(4, BACKWARD)
-
-            time.sleep(2)
-
-            self.DCMotorRun(3, RELEASE)
-            self.DCMotorRun(4, RELEASE)
-            time.sleep(2)
-            i += 5
-
-        GPIO.output(MOTOR_4_PWM, 0)
-        GPIO.output(MOTOR_3_PWM, 0)
-
+    def stopAllMotors(self):
+        self.DCMotorRun(1, RELEASE)
+        self.DCMotorRun(2, RELEASE)
         self.DCMotorRun(3, RELEASE)
         self.DCMotorRun(4, RELEASE)
-        m3.stop()
-        m4.stop()
+
+    def test(self):
+        i = 60
+        # while i < 160:
+        #     GPIO.output(MOTOR_3_PWM, i) # PWM in ideal
+        #     GPIO.output(MOTOR_4_PWM, 220-i) # PWM in ideal
+        #
+        #     self.DCMotorRun(3, FORWARD)
+        #     self.DCMotorRun(4, BACKWARD)
+        #
+        #     time.sleep(2)
+        #
+        #     self.DCMotorRun(3, RELEASE)
+        #     self.DCMotorRun(4, RELEASE)
+        #
+        #     time.sleep(2)
+        #
+        #     GPIO.output(MOTOR_4_PWM, i) # PWM in ideal
+        #     GPIO.output(MOTOR_3_PWM, 220-i) # PWM in ideal
+        #
+        #     self.DCMotorRun(3, BACKWARD)
+        #     self.DCMotorRun(4, FORWARD)
+        #
+        #     time.sleep(2)
+        #
+        #     self.DCMotorRun(3, RELEASE)
+        #     self.DCMotorRun(4, RELEASE)
+        #
+        #     time.sleep(2)
+        #     i += 20
+        self.runMotor(1, i)
+        self.runMotor(2, i)
+        self.runMotor(3, i)
+        self.runMotor(4, i)
+        time.sleep(2)
+        self.stopMotor(3)
+        self.stopMotor(4)
+        time.sleep(1)
+        self.runMotor(3, i, False)
+        self.runMotor(4, i, False)
+        time.sleep(2)
+        self.stopMotor(3)
+        self.stopMotor(4)
+        time.sleep(1)
+        self.runMotor(3, i, True)
+        self.runMotor(4, i, False)
+        time.sleep(2)
+        self.stopMotor(3)
+        self.stopMotor(4)
+        time.sleep(1)
+        self.runMotor(4, i, True)
+        self.runMotor(3, i, False)
+        time.sleep(2)
+        self.stopAllMotors()
+        time.sleep(1)
+        a.runMotor(2, 100)
+        a.runMotor(1, 100, False)
+        a.runMotor(3, 100)
+        a.runMotor(4, 100, False)
+        time.sleep(2)
+        self.stopAllMotors()
+        time.sleep(1)
+        a.runMotor(2, 100, False)
+        a.runMotor(1, 100)
+        a.runMotor(3, 100, False)
+        a.runMotor(4, 100)
+        time.sleep(2)
+        GPIO.output(MOTOR_1_PWM, 0) # PWM in ideal
+        GPIO.output(MOTOR_2_PWM, 0) # PWM in ideal
+        GPIO.output(MOTOR_4_PWM, 0) # PWM in ideal
+        GPIO.output(MOTOR_3_PWM, 0) # PWM in ideal
+
+
+        self.stopMotor(1)
+        self.stopMotor(2)
+        self.stopMotor(3)
+        self.stopMotor(4)
 
         return 'Done'
 
-
-# a = MotorContol()
-# a.DCMotorInit(1)
-# a.DCMotorInit(2)
-# a.DCMotorInit(3)
-# a.DCMotorInit(4)
-# # a.run_motor(3, 220-160, FORWARD)
-# # a.run_motor(4, 160, FORWARD)
-# # time.sleep(2)
-# # a.stop_motor(3)
-# # a.stop_motor(4)
-# # time.sleep(1)
-#
-# # a.main()
-#
-# a.runMotor(3, 45)
-# a.runMotor(4, 100, False)
-# a.runMotor(1)
-# a.runMotor(2)
-# time.sleep(2)
-# a.stopMotor(3)
-# a.stopMotor(4)
-# time.sleep(2)
-# a.runMotor(3, 100, False)
-# a.runMotor(4, 45)
-# time.sleep(2)
-# a.stopMotor(3)
-# a.stopMotor(4)
-# a.stopMotor(2)
-# a.stopMotor(1)
-# a.releaseMotor(1)
-# a.releaseMotor(2)
-# a.releaseMotor(3)
-# a.releaseMotor(4)
+# a = MotorControl()
+# a.test()
 # GPIO.cleanup()

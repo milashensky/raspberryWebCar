@@ -6,10 +6,10 @@ import math
 
 from flask import Flask, send_from_directory, request
 from flask import render_template
-from modules.L293D import MotorContol
+from modules.L293D import MotorControl
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__)))
-a = MotorContol()
+a = MotorControl()
 app = Flask(__name__)
 
 
@@ -28,23 +28,42 @@ def parse_request():
     response = request.data
     if response:
         data = json.loads(response.decode())
-        # print(data)
-        left = math.fabs(data.get('left', 0))
-        right = math.fabs(data.get('right', 0))
-        speed = data.get('speed', 0)
-        direction = data.get('direction', True)
-        if not speed:
-            a.stopMotor(1)
-            a.stopMotor(2)
-            a.stopMotor(3)
-            a.stopMotor(4)
-        else:
-            a.runMotor(2, round(right * speed * 100 / 3), direction)
-            a.runMotor(3, round(right * speed * 100 / 3), direction)
-            a.runMotor(1, round(left * speed * 100 / 3), direction)
-            a.runMotor(4, round(left * speed * 100 / 3), direction)
+        print(data)
+        direction = data.get('direction', '')
+        if 'up' in direction:
+            a.stopAllMotors()
+
+            a.runMotor(2, 100)
+            a.runMotor(1, 100)
+
+            a.runMotor(3, 100)
+            a.runMotor(4, 100)
+        elif 'down' in direction:
+            a.stopAllMotors()
+
+            a.runMotor(2, 100, False)
+            a.runMotor(1, 100, False)
+
+            a.runMotor(3, 100, False)
+            a.runMotor(4, 100, False)
+        elif 'left' in direction:
+            a.stopAllMotors()
+
+            a.runMotor(2, 100)
+            a.runMotor(1, 100, False)
+            a.runMotor(3, 100)
+            a.runMotor(4, 100, False)
+        elif 'right' in direction:
+            a.stopAllMotors()
+
+            a.runMotor(2, 100, False)
+            a.runMotor(1, 100)
+
+            a.runMotor(3, 100, False)
+            a.runMotor(4, 100)
+        elif direction.strip() == '':
+            a.stopAllMotors()
 
         # amspi.run_dc_motors([2, 3], clockwise=rightCl, speed=)
         # amspi.run_dc_motors([1, 4], clockwise=leftCl, speed=round(left * speed * 100 / 3))
-        time.sleep(0.5)
     return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
