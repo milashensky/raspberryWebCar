@@ -38,8 +38,8 @@ def parse_request():
         else:
             # a.runMotor(2, round(right * speed * 100 / 3), direction)
             # a.runMotor(3, round(right * speed * 100 / 3), direction)
-            a.runMotors([1, 3], round(right * speed * 100 / 3), direction)
-            a.runMotors([2, 4], round(left * speed * 100 / 3), direction)
+            a.runMotors([1, 4], round(left * speed * 100 / 3), direction)
+            a.runMotors([2, 3], round(right * speed * 100 / 3), direction)
 
         # amspi.run_dc_motors([2, 3], clockwise=rightCl, speed=)
         # amspi.run_dc_motors([1, 4], clockwise=leftCl, speed=round(left * speed * 100 / 3))

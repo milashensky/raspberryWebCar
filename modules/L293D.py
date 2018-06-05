@@ -7,27 +7,6 @@ ENABLE = 0
 FORWARD = 1
 BACKWARD = 2
 
-
-m1 = [14, 15, 18]
-m2 = [2, 3, 4]
-m3 = [25, 8, 7]
-m4 = [10, 9, 11]
-
-
-
-# Motor1A = m1[0]
-# Motor1B = m1[1]
-# Motor1E = m1[2]
-#
-# GPIO.setup(Motor1A,GPIO.OUT)
-# GPIO.setup(Motor1B,GPIO.OUT)
-# GPIO.setup(Motor1E,GPIO.OUT)
-#
-# print("Turning motor on")
-# GPIO.output(Motor1A, 1)
-# GPIO.output(Motor1B, 0)
-# GPIO.output(Motor1E, 1)
-
 def PWM(pin, val):
     cmd = 'echo "%d=%.2f" > /dev/pi-blaster' % ( pin, val / 100)
     # print(cmd)
@@ -37,13 +16,13 @@ def PWM(pin, val):
 class MotorControl:
     MOTORS = {
         1: {
-            ENABLE:  18,
-            FORWARD: 14,
-            BACKWARD: 15,
+            ENABLE:  5,
+            FORWARD: 26,
+            BACKWARD: 13,
         },
         2: {
-            ENABLE:  17,
-            FORWARD: 22,
+            ENABLE:  22,
+            FORWARD: 17,
             BACKWARD: 27,
         },
         3: {
@@ -76,8 +55,8 @@ class MotorControl:
     def runMotor(self, num, speed=100, direction=True):
         motor = self.MOTORS[num]
         if direction:
-             GPIO.output(motor[FORWARD], 1)
-             GPIO.output(motor[BACKWARD], 0)
+            GPIO.output(motor[FORWARD], 1)
+            GPIO.output(motor[BACKWARD], 0)
         else:
             GPIO.output(motor[FORWARD], 0)
             GPIO.output(motor[BACKWARD], 1)
@@ -109,21 +88,21 @@ class MotorControl:
 
 
 # a = MotorControl()
-#
+
 # for i in range(1, 5):
-#     a.runMotor(i, 0, True)
+#     a.runMotor(i, 40, True)
 #     sleep(1)
-#     a.runMotor(i, 0, False)
+#     a.runMotor(i, 40, False)
 #     sleep(1)
 #     a.stopMotor(i)
 #
 #
 # a.runMotors(speed=100)
+# sleep(3)
+# a.stopMotors()
 # sleep(1)
-# a.runMotors(speed=50)
-# sleep(1)
+# a.runMotors(speed=70, direction=False)
+# sleep(3)
 # a.runMotors(speed=20)
 # sleep(1)
 # a.releaseMotors()
-#
-# GPIO.cleanup()
