@@ -2,8 +2,8 @@ import numpy as np
 import math
 
 
-def calculateDirection():
-    coords = [[55.771666, 37.576287], [55.772159, 37.576265], [55.772956, 37.574639]]
+def calculate_direction(A, B, C):
+    coords = [A, B, C]
     last = coords[0]
     curr = coords[1]
     nxt = coords[2]
@@ -18,7 +18,7 @@ def calculateDirection():
     # D < 0 left
 
     # forward or backward by distanse from last and current
-    return True
+    return D
 
 
 def latlong_to_3d(latr, lonr):
@@ -67,3 +67,10 @@ def get_angle(A, B, C):
     angle3deg = angle_between_vectors_degrees(a3vec, c3vec)
 
     return angle2deg, angle3deg
+
+
+def get_distance(lat1, lon1, lat2, lon2):
+    return math.fabs(6371000 * math.acos(math.cos(math.radians(float(lat1))) *
+                            math.cos(math.radians(float(lat2))) *
+                            math.cos(math.radians(float(lon2)) - math.radians(float(lon1))) +
+                            math.sin(math.radians(float(lat1))) * math.sin(math.radians(float(lat2)))))
