@@ -143,7 +143,6 @@ def processLocation():
 
 
 def testLocation():
-    # import pudb; pudb.set_trace()
     global last_lat
     global last_lon
     global my_lat
