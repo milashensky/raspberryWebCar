@@ -1,5 +1,8 @@
 import numpy as np
 import math
+import serial
+import time
+import pynmea2
 
 
 def calculate_direction(A, B, C):
@@ -70,7 +73,46 @@ def get_angle(A, B, C):
 
 
 def get_distance(lat1, lon1, lat2, lon2):
-    return math.fabs(6371000 * math.acos(math.cos(math.radians(float(lat1))) *
-                            math.cos(math.radians(float(lat2))) *
-                            math.cos(math.radians(float(lon2)) - math.radians(float(lon1))) +
-                            math.sin(math.radians(float(lat1))) * math.sin(math.radians(float(lat2)))))
+    try:
+        return math.fabs(6371000 * math.acos(math.cos(math.radians(float(lat1))) *
+                                math.cos(math.radians(float(lat2))) *
+                                math.cos(math.radians(float(lon2)) - math.radians(float(lon1))) +
+                                math.sin(math.radians(float(lat1))) * math.sin(math.radians(float(lat2)))))
+    except ValueError:
+        return 1000000
+
+def readlineCR(port):
+    rv = ""
+    while True:
+        ch = ''
+        try:
+            ch = port.read().decode('ascii')
+            rv += ch
+        except UnicodeDecodeError:
+            pass
+        # print(rv)
+        if ch=='\r' or ch=='':
+            return rv
+    return None
+
+
+def getLocation():
+    port = serial.Serial("/dev/ttyUSB0", baudrate=9600, timeout=3.0)
+    one = False
+    msg = []
+    parsed = []
+    while True:
+        p = readlineCR(port)
+        # print('p = ', p)
+        if p.strip().startswith('$GNRMC') and not one:
+            one = True
+        if one:
+            msg.append(p);
+        if p.strip().startswith('$BDGSV'):
+            if len(msg) > 1:
+                one = False
+                parsed = [pynmea2.parse(msg[0]), pynmea2.parse(msg[1])]
+                break
+            else:
+                msg = []
+    return parsed
