@@ -193,8 +193,10 @@ def getMyLocation():
         lon = loc[0].lon
         # alt = loc[0].altitude
         if lat and lon:
-            lat = float(lat) / 100
-            lon = float(lon) / 100
+            t = float(lat)
+            lat = t // 100 + (t / 100 - t // 100) / 0.6
+            t = float(lon)
+            lon = t // 100 + (t / 100 - t // 100) / 0.6
             distanse = math.fabs(get_distance(lat, lon, my_lat, my_lon))
         if not my_lat and not my_lon or distanse < MAX_APPROVED_DISTANCE and distanse >= 0.5:
             last_lat = my_lat
